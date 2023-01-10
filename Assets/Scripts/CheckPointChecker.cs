@@ -5,13 +5,17 @@ using UnityEngine;
 public class CheckPointChecker : MonoBehaviour
 {
     public CarMovement theCar;
-    private void OnTriggerEnter(Collider other)
+
+    private void OnTriggerExit(Collider other)
     {
-        if(other.tag == "CheckPoint")
+        if (other.tag == "CheckPoint")
         {
-            //Debug.Log("Hit cp " + other.GetComponent<CheckPoints>().checkpointNumber);
+            Debug.Log("Hit cp " + other.GetComponent<CheckPoints>().checkpointNumber);
 
             theCar.CheckPointHit(other.GetComponent<CheckPoints>().checkpointNumber);
         }
     }
+
+
+
 }
