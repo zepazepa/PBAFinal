@@ -29,6 +29,10 @@ public class CarMovement : MonoBehaviour
     public float emisiMaks = 25f, kecepatanEmisiHilang = 20f;
     private float cepatEmisiHilang;
 
+    public AudioSource suaraMesin;
+
+    public float waktuLap;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -41,11 +45,19 @@ public class CarMovement : MonoBehaviour
             RandomizeAITarget();
             kecepatanAiAcak = Random.Range(0.7f, 0.9f);
         }
+
+        UIManager.instance.teksLap.text = lapSekarang + "/" + RaceManager.instance.jumlahLap;
     }
 
     // Update is called once per frame
     void Update()
     {
+        waktuLap += Time.deltaTime;
+
+        var timeSpan = System.TimeSpan.FromSeconds(waktuLap);
+
+        UIManager.instance.teksWaktu.text = string.Format("{0:00}m{1:00}.{2:000}s", timeSpan.Minutes, timeSpan.Seconds, timeSpan.Milliseconds);
+
         if (!apakahAI)
         {
             inputKecepatan = 0f;
@@ -100,9 +112,14 @@ public class CarMovement : MonoBehaviour
         //mengontrol debu ban
         cepatEmisiHilang = Mathf.MoveTowards(cepatEmisiHilang, 5, kecepatanEmisiHilang * Time.deltaTime);
 
-        if (Mathf.Abs(inputBelokan) > 0.5f)
+        if (Mathf.Abs(inputBelokan) > 0.5f || (rigidBody.velocity.magnitude < kecepatanMaksimal * 0.5f && rigidBody.velocity.magnitude != 0f))
         {
             cepatEmisiHilang = emisiMaks;
+        }
+
+        if (rigidBody.velocity.magnitude == 0f)
+        {
+            cepatEmisiHilang = 0f;
         }
 
         for (int i = 0; i < debuBan.Length; i++)
@@ -110,6 +127,11 @@ public class CarMovement : MonoBehaviour
             var modulEmisi = debuBan[i].emission;
 
             modulEmisi.rateOverTime = cepatEmisiHilang;
+        }
+
+        if (suaraMesin != null)
+        {
+            suaraMesin.pitch = 1f + ((rigidBody.velocity.magnitude / kecepatanMaksimal) / 2f);
         }
     }
 
@@ -149,7 +171,7 @@ public class CarMovement : MonoBehaviour
             if (nextCheckpoint == RaceManager.instance.allCheckPoint.Length)
             {
                 nextCheckpoint = 0;
-                lapSekarang++;
+                LapCompleted();
             }
         }
 
@@ -167,9 +189,13 @@ public class CarMovement : MonoBehaviour
         titikTujuan += new Vector3(Random.Range(-varianPointAI, varianPointAI), 0f, Random.Range(-varianPointAI, varianPointAI));
     }
 
-    public void LapComplete()
+    public void LapCompleted()
     {
-         
+        lapSekarang++;
+
+        waktuLap = 0f;
+
+        UIManager.instance.teksLap.text = lapSekarang + "/" + RaceManager.instance.jumlahLap;
     }
 
     public void SetNextAITarget()
