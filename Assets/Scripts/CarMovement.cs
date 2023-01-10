@@ -14,14 +14,20 @@ public class CarMovement : MonoBehaviour
     private float inputBelokan;
 
     private int nextCheckpoint;
-    public int currentlap;
+    public int lapSekarang;
 
     public bool apakahAI;
     public int targetSekarang;
     private Vector3 titikTujuan;
-    public float kecepatanAI = 1f, kecepatanBelokAI = 0.8f, rentangTitikAI = 5f, varianPointAI = 3f, kecepatanMaxBelokAI = 15f;
+    public float kecepatanAI = 1f, kecepatanBelokAI = 0.8f, rentangTitikAI = 5f, varianPointAI = 3f, kecepatanMaksBelokAI = 15f;
     private float inputKecepatanAI, kecepatanAiAcak;
 
+    public Transform banDepanKiri, banDepanKanan;
+    public float kecepatanMaksBelokBan = 25f;
+
+    public ParticleSystem[] debuBan;
+    public float emisiMaks = 25f, kecepatanEmisiHilang = 20f;
+    private float cepatEmisiHilang;
 
     // Start is called before the first frame update
     void Start()
@@ -64,16 +70,16 @@ public class CarMovement : MonoBehaviour
             }
 
             Vector3 targetDirection = titikTujuan - transform.position;
-            float angle = Vector3.Angle(targetDirection, transform.forward);
+            float sudut = Vector3.Angle(targetDirection, transform.forward);
             Vector3 posisiLokal = transform.InverseTransformPoint(titikTujuan);
             if (posisiLokal.x < 0f)
             {
-                angle = -angle;
+                sudut = -sudut;
             }
 
-            inputBelokan = Mathf.Clamp(angle / kecepatanMaxBelokAI, -1f, 1f);
+            inputBelokan = Mathf.Clamp(sudut / kecepatanMaksBelokAI, -1f, 1f);
 
-            if (Mathf.Abs(angle) < kecepatanMaxBelokAI)
+            if (Mathf.Abs(sudut) < kecepatanMaksBelokAI)
             {
                 inputKecepatanAI = Mathf.MoveTowards(inputKecepatanAI, 1f, kecepatanAI);
             }
@@ -84,7 +90,27 @@ public class CarMovement : MonoBehaviour
 
             inputKecepatan = inputKecepatanAI * akselerasiMaju * kecepatanAiAcak;
         }
+
+        //belok ban
+        banDepanKiri.localRotation = Quaternion.Euler(banDepanKiri.localRotation.eulerAngles.x, inputBelokan * kecepatanMaksBelokBan, banDepanKiri.localRotation.eulerAngles.z);
+        banDepanKanan.localRotation = Quaternion.Euler(banDepanKanan.localRotation.eulerAngles.x, inputBelokan * kecepatanMaksBelokBan, banDepanKanan.localRotation.eulerAngles.z);
+
         //transform.position = rigidBody.position;
+
+        //mengontrol debu ban
+        cepatEmisiHilang = Mathf.MoveTowards(cepatEmisiHilang, 5, kecepatanEmisiHilang * Time.deltaTime);
+
+        if (Mathf.Abs(inputBelokan) > 0.5f)
+        {
+            cepatEmisiHilang = emisiMaks;
+        }
+
+        for (int i = 0; i < debuBan.Length; i++)
+        {
+            var modulEmisi = debuBan[i].emission;
+
+            modulEmisi.rateOverTime = cepatEmisiHilang;
+        }
     }
 
     private void FixedUpdate()
@@ -123,7 +149,7 @@ public class CarMovement : MonoBehaviour
             if (nextCheckpoint == RaceManager.instance.allCheckPoint.Length)
             {
                 nextCheckpoint = 0;
-                currentlap++;
+                lapSekarang++;
             }
         }
 
