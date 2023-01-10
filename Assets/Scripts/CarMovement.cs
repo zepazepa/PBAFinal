@@ -65,8 +65,8 @@ public class CarMovement : MonoBehaviour
 
             Vector3 targetDirection = titikTujuan - transform.position;
             float angle = Vector3.Angle(targetDirection, transform.forward);
-            Vector3 localPosition = transform.InverseTransformPoint(titikTujuan);
-            if (localPosition.x < 0f)
+            Vector3 posisiLokal = transform.InverseTransformPoint(titikTujuan);
+            if (posisiLokal.x < 0f)
             {
                 angle = -angle;
             }
@@ -110,10 +110,7 @@ public class CarMovement : MonoBehaviour
             /*rigidBody.velocity.magnitude = seberapa cepat rigid body bergerak sekarang. kecepatan tsb dibagi dgn max speed agar cocok dilihat secara visual*/
             /*contoh: rb velo sekarang 10f dan max speed juga 10f, makan mobil berbelok dengan maksimal yaitu(1) sedangkan jika rb velo 5f maka mobil berbelok 1 / 2(0.5)*/
 
-            transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles +
-                                 new Vector3(0f,
-                                             inputBelokan * kekuatanBelokan * Time.deltaTime * Mathf.Sign(inputKecepatan) * (rigidBody.velocity.magnitude / kecepatanMaksimal),
-                                             0f));
+            transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + new Vector3(0f, (inputBelokan * kekuatanBelokan * Time.deltaTime * Mathf.Sign(inputKecepatan) * (rigidBody.velocity.magnitude / kecepatanMaksimal)), 0f));
         }
     }
 
