@@ -39,7 +39,7 @@ public class CarMovement : MonoBehaviour
         {
             titikTujuan = RaceManager.instance.allCheckPoint[targetSekarang].transform.position;
             RandomizeAITarget();
-            kecepatanAiAcak = Random.Range(0.7f, 1.2f);
+            kecepatanAiAcak = Random.Range(0.7f, 0.9f);
         }
     }
 
